@@ -20,7 +20,7 @@ static void onDeleted(char *sender, SystemEventArgs e);
 static void onRenamed(char *sender, SystemEventArgs e);
 
 // Watchers
-void *Watcher(void* arg);
+void *Watcher(void *arg);
 void StartThread(const char *path);
 
 #endif
