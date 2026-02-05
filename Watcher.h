@@ -1,4 +1,3 @@
-// Watcher.h
 #ifndef WATCHER_H
 #define WATCHER_H
 #include <pthread.h>
