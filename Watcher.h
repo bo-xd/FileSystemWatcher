@@ -1,26 +1,34 @@
+// Watcher.h
 #ifndef WATCHER_H
 #define WATCHER_H
-
+#include <pthread.h>
 #include <stdbool.h>
 
 typedef struct {
-  const char *path;
-} Watch;
+  char *FullPath;
+  char *Name;
+} FileSystemEventArgs;
+
+typedef void (*FileSystemEventHandler)(void *sender, FileSystemEventArgs *e);
 
 typedef struct {
-  bool Changed;
-  bool Created;
-  bool Deleted;
-} SystemEventArgs;
+  const char *Path;
+  bool EnableRaisingEvents;
+  bool IncludeSubdirectories;
 
-// Events
-static void onChanged(char *sender, SystemEventArgs e);
-static void OnCreated(char *sender, SystemEventArgs e);
-static void onDeleted(char *sender, SystemEventArgs e);
-static void onRenamed(char *sender, SystemEventArgs e);
+  FileSystemEventHandler Changed;
+  FileSystemEventHandler Created;
+  FileSystemEventHandler Deleted;
+  FileSystemEventHandler Renamed;
 
-// Watchers
-void *Watcher(void *arg);
-void StartThread(const char *path);
+  int _inotify_fd;
+  int _watch_descriptor;
+  pthread_t _thread;
+  bool _running;
+} FileSystemWatcher;
+
+FileSystemWatcher *FileSystemWatcher_Create(const char *path);
+void FileSystemWatcher_Dispose(FileSystemWatcher *watcher);
+void FileSystemWatcher_Start(FileSystemWatcher *watcher);
 
 #endif

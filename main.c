@@ -1,17 +1,42 @@
 #include "Watcher.h"
+#include <signal.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 
+FileSystemWatcher *watcher = NULL;
+
+void OnFileCreated(void *sender, FileSystemEventArgs *e) {
+  printf("Created: %s\n", e->FullPath);
+}
+
+void OnFileChanged(void *sender, FileSystemEventArgs *e) {
+  printf("Modified: %s\n", e->FullPath);
+}
+
+void OnFileDeleted(void *sender, FileSystemEventArgs *e) {
+  printf("Deleted: %s\n", e->FullPath);
+}
+
+void signal_handler(int sig) {
+  printf("\nCleaning up...\n");
+  FileSystemWatcher_Dispose(watcher);
+  exit(0);
+}
+
 int main() {
-    const char *path_to_watch = "./";
+  signal(SIGINT, signal_handler);
 
-    printf("Starting file system watcher on: %s\n", path_to_watch);
-    
-    StartThread(path_to_watch);
+  watcher = FileSystemWatcher_Create("/home/");
+  watcher->Created = OnFileCreated;
+  watcher->Changed = OnFileChanged;
+  watcher->Deleted = OnFileDeleted;
 
-    while (1) {
-        sleep(1);
-    }
+  FileSystemWatcher_Start(watcher);
 
-    return 0;
+  while (1) {
+    sleep(1);
+  }
+
+  return 0;
 }
